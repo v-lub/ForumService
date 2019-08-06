@@ -6,5 +6,5 @@ import telran.java29.forum.dto.UserRegDto;
 public interface AccountService {
 	UserProfileDto addUser(UserRegDto userRegDto);
 
-	UserProfileDto findUserById(String login);
+	UserProfileDto findUserById(String login, String auth);
 }
