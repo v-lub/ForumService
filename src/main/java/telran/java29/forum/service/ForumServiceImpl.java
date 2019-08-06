@@ -1,6 +1,8 @@
 package telran.java29.forum.service;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +17,7 @@ import telran.java29.forum.dto.NewCommentDto;
 import telran.java29.forum.dto.NewPostDto;
 import telran.java29.forum.dto.PostDto;
 import telran.java29.forum.dto.PostUpdateDto;
+import telran.java29.forum.exceptions.BadDateFormatException;
 
 @Service
 public class ForumServiceImpl implements ForumService {
@@ -38,14 +41,32 @@ public class ForumServiceImpl implements ForumService {
 
 	@Override
 	public PostDto removePost(String id) {
-		// TODO Auto-generated method stub
-		return null;
+		Post post = repository.findById(id).orElse(null);
+		if (post != null) {
+			repository.delete(post);
+		}
+		return post == null ? null : convertToPostDto(post);
 	}
 
 	@Override
 	public PostDto updatePost(PostUpdateDto postUpdateDto) {
-		// TODO Auto-generated method stub
-		return null;
+		Post post = repository.findById(postUpdateDto.getId()).orElse(null);
+		if (post != null) {
+			String content = postUpdateDto.getContent();
+			if (content != null) {
+				post.setContent(content);
+			}
+			String title = postUpdateDto.getTitle();
+			if (title != null) {
+				post.setTitle(title);
+			}
+			Set<String> tags = postUpdateDto.getTags();
+			if (tags != null) {
+				tags.forEach(post::addTag);
+			}
+			repository.save(post);
+		}
+		return post == null ? null : convertToPostDto(post);
 	}
 
 	@Override
@@ -72,20 +93,29 @@ public class ForumServiceImpl implements ForumService {
 
 	@Override
 	public Iterable<PostDto> findPostsByTags(List<String> tags) {
-		// TODO Auto-generated method stub
-		return null;
+		return repository.findByTagsIn(tags).stream()
+					.map(this::convertToPostDto)
+					.collect(Collectors.toList());
 	}
 
 	@Override
 	public Iterable<PostDto> findPostsByAuthor(String author) {
-		// TODO Auto-generated method stub
-		return null;
+		return repository.findByAuthor(author).stream()
+				.map(this::convertToPostDto)
+				.collect(Collectors.toList());
 	}
 
 	@Override
 	public Iterable<PostDto> findPostsByDates(DatePeriodDto periodDto) {
-		// TODO Auto-generated method stub
-		return null;
+		try {
+			LocalDate from = LocalDate.parse(periodDto.getFrom());
+			LocalDate to = LocalDate.parse(periodDto.getTo());
+			return repository.findByDateCreatedBetween(from, to).stream()
+					.map(this::convertToPostDto)
+					.collect(Collectors.toList());
+		} catch (Exception e) {
+			throw new BadDateFormatException();
+		}
 	}
 	
 	private PostDto convertToPostDto(Post post) {

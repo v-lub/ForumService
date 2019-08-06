@@ -6,7 +6,7 @@ import lombok.Getter;
 
 @Getter
 public class PostUpdateDto {
-	Long id;
+	String id;
 	String title;
 	String content;
 	Set<String> tags;
