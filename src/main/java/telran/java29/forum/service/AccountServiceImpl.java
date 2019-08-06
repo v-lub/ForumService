@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import telran.java29.forum.configuration.AccountConfiguration;
 import telran.java29.forum.dao.UserAccountRepository;
 import telran.java29.forum.domain.UserAccount;
 import telran.java29.forum.dto.UserProfileDto;
@@ -16,7 +17,8 @@ public class AccountServiceImpl implements AccountService {
 	@Autowired
 	UserAccountRepository userRepository;
 	
-	long expPerod = 30;
+	@Autowired
+	AccountConfiguration accountConfiguration;
 
 	@Override
 	public UserProfileDto addUser(UserRegDto userRegDto) {
@@ -29,7 +31,7 @@ public class AccountServiceImpl implements AccountService {
 				.firstName(userRegDto.getFirstName())
 				.lastName(userRegDto.getLastName())
 				.role("User")
-				.expdate(LocalDateTime.now().plusDays(expPerod))
+				.expdate(LocalDateTime.now().plusDays(accountConfiguration.getExpPeriod()))
 				.build();
 		userRepository.save(userAccount);
 		return convertToUserProfileDto(userAccount);
