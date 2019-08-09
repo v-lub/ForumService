@@ -4,7 +4,6 @@ import lombok.Getter;
 
 @Getter
 public class UserEditDto {
-	String password;
 	String firstName;
 	String lastName;
 }

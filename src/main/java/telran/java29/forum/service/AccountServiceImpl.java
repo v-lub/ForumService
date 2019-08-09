@@ -3,6 +3,7 @@ package telran.java29.forum.service;
 import java.time.LocalDateTime;
 import java.util.Set;
 
+import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -30,9 +31,15 @@ public class AccountServiceImpl implements AccountService {
 		if (userRepository.existsById(userRegDto.getLogin())) {
 			throw new UserConflictException();
 		}
-		UserAccount userAccount = UserAccount.builder().login(userRegDto.getLogin()).password(userRegDto.getPassword())
-				.firstName(userRegDto.getFirstName()).lastName(userRegDto.getLastName()).role("User")
-				.expdate(LocalDateTime.now().plusDays(accountConfiguration.getExpPeriod())).build();
+		String hashPassword = BCrypt.hashpw(userRegDto.getPassword(), BCrypt.gensalt());
+		UserAccount userAccount = UserAccount.builder()
+				.login(userRegDto.getLogin())
+				.password(hashPassword)
+				.firstName(userRegDto.getFirstName())
+				.lastName(userRegDto.getLastName())
+				.role("User")
+				.expdate(LocalDateTime.now().plusDays(accountConfiguration.getExpPeriod()))
+				.build();
 		userRepository.save(userAccount);
 		return convertToUserProfileDto(userAccount);
 	}
@@ -43,7 +50,7 @@ public class AccountServiceImpl implements AccountService {
 
 		UserAccount userAccount = userRepository.findById(credentials.getLogin())
 				.orElseThrow(() -> new UserAuthenticationException());
-		if (!userAccount.getPassword().equals(credentials.getPassword())) {
+		if (!BCrypt.checkpw(credentials.getPassword(), userAccount.getPassword())) {
 			throw new UserAuthenticationException();
 		}
 		if (!userAccount.getLogin().equals(login)) {
@@ -57,7 +64,7 @@ public class AccountServiceImpl implements AccountService {
 		AccountUserCredentials credentials = accountConfiguration.tokenDecode(auth);
 		UserAccount userAccount = userRepository.findById(credentials.getLogin())
 				.orElseThrow(() -> new UserAuthenticationException());
-		if (!userAccount.getPassword().equals(credentials.getPassword())) {
+		if (!BCrypt.checkpw(credentials.getPassword(), userAccount.getPassword())) {
 			throw new UserAuthenticationException();
 		}
 		if (userEditDto.getFirstName() != null) {
@@ -65,9 +72,6 @@ public class AccountServiceImpl implements AccountService {
 		}
 		if (userEditDto.getLastName() != null) {
 			userAccount.setLastName(userEditDto.getLastName());
-		}
-		if (userEditDto.getPassword() != null) {
-			userAccount.setPassword(userEditDto.getPassword());
 		}
 		userRepository.save(userAccount);
 
@@ -79,7 +83,7 @@ public class AccountServiceImpl implements AccountService {
 		AccountUserCredentials credentials = accountConfiguration.tokenDecode(auth);
 		UserAccount userAccount = userRepository.findById(credentials.getLogin())
 				.orElseThrow(() -> new UserAuthenticationException());
-		if (!userAccount.getPassword().equals(credentials.getPassword())) {
+		if (!BCrypt.checkpw(credentials.getPassword(), userAccount.getPassword())) {
 			throw new UserAuthenticationException();
 		}
 		userRepository.delete(userAccount);
@@ -91,7 +95,7 @@ public class AccountServiceImpl implements AccountService {
 		AccountUserCredentials credentials = accountConfiguration.tokenDecode(auth);
 		UserAccount admin = userRepository.findById(credentials.getLogin())
 				.orElseThrow(() -> new UserAuthenticationException());
-		if (!admin.getPassword().equals(credentials.getPassword())) {
+		if (!BCrypt.checkpw(credentials.getPassword(), admin.getPassword())) {
 			throw new UserAuthenticationException();
 		}
 		if (!admin.getRoles().contains("Admin")) {
@@ -111,6 +115,14 @@ public class AccountServiceImpl implements AccountService {
 				.login(userAccount.getLogin())
 				.roles(userAccount.getRoles())
 				.build();
+	}
+
+	@Override
+	public void changePassword(String login, String password) {
+		UserAccount userAccount = userRepository.findById(login).get();
+		String hashPassword = BCrypt.hashpw(password, BCrypt.gensalt());
+		userAccount.setPassword(hashPassword);
+		userRepository.save(userAccount);
 	}
 
 }

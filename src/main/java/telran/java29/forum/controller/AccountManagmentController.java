@@ -1,5 +1,6 @@
 package telran.java29.forum.controller;
 
+import java.security.Principal;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +50,19 @@ public class AccountManagmentController {
 	public Set<String> addRole(@PathVariable String id, @PathVariable String role,
 			@RequestHeader("Authorization") String auth) {
 		return accountService.addRole(id, role, auth);
+	}
+	
+	@DeleteMapping("/{id}/{role}")
+	public Set<String> removeRole(@PathVariable String id, @PathVariable String role,
+			@RequestHeader("Authorization") String auth) {
+		//TODO
+		return null;
+	}
+	
+	@PutMapping("/password")
+	public void changePassword(Principal principal,
+			@RequestHeader("X-Password") String password) {
+		accountService.changePassword(principal.getName(), password);
 	}
 
 }

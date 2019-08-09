@@ -16,4 +16,6 @@ public interface AccountService {
 	UserProfileDto removeUser(String auth);
 
 	Set<String> addRole(String id, String role, String auth);
+
+	void changePassword(String name, String password);
 }

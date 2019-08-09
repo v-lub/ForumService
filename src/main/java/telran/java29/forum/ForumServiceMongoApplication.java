@@ -2,6 +2,7 @@ package telran.java29.forum;
 
 import java.time.LocalDateTime;
 
+import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -23,9 +24,10 @@ public class ForumServiceMongoApplication implements CommandLineRunner{
 	@Override
 	public void run(String... args) throws Exception {
 		if(!accountRepository.existsById("admin")) {
+			String hashPassword = BCrypt.hashpw("admin", BCrypt.gensalt());
 			UserAccount admin = UserAccount.builder()
 					.login("admin")
-					.password("admin")
+					.password(hashPassword)
 					.firstName("Super")
 					.lastName("Admin")
 					.role("Admin")
