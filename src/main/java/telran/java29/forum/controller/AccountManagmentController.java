@@ -4,7 +4,6 @@ import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -13,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import lombok.Delegate;
 import telran.java29.forum.dto.UserEditDto;
 import telran.java29.forum.dto.UserProfileDto;
 import telran.java29.forum.dto.UserRegDto;
@@ -39,21 +37,18 @@ public class AccountManagmentController {
 
 	@PutMapping
 	public UserProfileDto edit(@RequestBody UserEditDto userEditDto, @RequestHeader("Authorization") String auth) {
-		// TODO
-		return null;
+		return accountService.editUser(userEditDto, auth);
 	}
 
 	@DeleteMapping
 	public UserProfileDto remove(@RequestHeader("Authorization") String auth) {
-		// TODO
-		return null;
+		return accountService.removeUser(auth);
 	}
 
 	@PutMapping("/{id}/{role}")
 	public Set<String> addRole(@PathVariable String id, @PathVariable String role,
 			@RequestHeader("Authorization") String auth) {
-		// TODO
-		return null;
+		return accountService.addRole(id, role, auth);
 	}
 
 }
