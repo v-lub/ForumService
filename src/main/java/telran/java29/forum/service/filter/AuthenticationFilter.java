@@ -53,11 +53,12 @@ public class AuthenticationFilter implements Filter {
 						response.sendError(401, "User or password is not correct");
 					}else {
 						user = credentials.getLogin();
+						chain.doFilter(new WrapperRequest(request, user), response);
 					}
 				}
 			}
 		}
-		chain.doFilter(new WrapperRequest(request, user), response);
+		
 	}
 	
 	private class WrapperRequest extends HttpServletRequestWrapper{
