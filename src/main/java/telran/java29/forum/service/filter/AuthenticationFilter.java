@@ -57,6 +57,8 @@ public class AuthenticationFilter implements Filter {
 					}
 				}
 			}
+		}else {
+			chain.doFilter(request, response);
 		}
 		
 	}
@@ -82,7 +84,8 @@ public class AuthenticationFilter implements Filter {
 	}
 
 	private boolean checkPointCut(String path, String method) {
-		return !("/account/".equalsIgnoreCase(path) && "Post".equalsIgnoreCase(method));
+		boolean check = !("/account/".equalsIgnoreCase(path) && "Post".equalsIgnoreCase(method));
+		return check;
 	}
 
 	@Override
